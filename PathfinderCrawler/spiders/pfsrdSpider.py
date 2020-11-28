@@ -2,6 +2,7 @@ import scrapy
 import html2text
 import json
 from scrapy.spiders import Spider
+from sanitize_filename import sanitize
 
 
 class PfsrdSpider(Spider):
@@ -32,12 +33,13 @@ class PfsrdSpider(Spider):
         # Cerco di prendere solo gli articoli che contengono paragrafi (e quindi probabilmente testo utile)
         articleContent = response.xpath("//div[contains(@class, 'article-content') and p]").get()
         if articleContent:
-            filename = self.documentsDir+page+".json"
-            with open(filename, 'w') as f:
+            filename = sanitize(title).lower().replace(' ','-')
+            filename = self.documentsDir+filename+".json"
+            with open(filename, 'x') as file:
                 #Parsing dal contenuto html a testo (markdown)
                 contentToText = self.text_maker.handle(articleContent)
                 pagina["content"] = contentToText
-                json.dump(pagina, f)
+                json.dump(pagina, file)
                 self.log(f'Saved file {filename}')
 
         for href in response.xpath('//a/@href').getall():
