@@ -24,28 +24,45 @@ class PfsrdSpider(Spider):
             "url":response.url,
             "content":None
         }
-        title = response.xpath('//main/section/article/h1/text()').get()
-        pagina["title"] = title
-        print(title)
-        page = response.url.split("/")[-2]
-        self.log(f'Visited page {title}, {page}')
 
-        # Cerco di prendere solo gli articoli che contengono paragrafi (e quindi probabilmente testo utile)
-        articleContent = response.xpath("//div[contains(@class, 'article-content') and p]").get()
-        if articleContent:
-            filename = sanitize(title).lower().replace(' ','-')
-            filename = self.documentsDir+filename+".json"
+        contentType = response.headers["Content-Type"].decode("utf-8").lower()
+        if contentType.find("html") != -1:
+            page = response.url.split("/")[-2]
+            title = response.xpath('//main/section/article/h1/text()').get()
+            pagina["title"] = title
+            print(title)
+            self.log(f'Visited page {title}, {page}')
+
+            # Cerco di prendere solo gli articoli che contengono paragrafi (e quindi probabilmente testo utile)
+            articleContent = response.xpath("//div[contains(@class, 'article-content') and p]").get()
+            if articleContent:
+                filename = sanitize(title).lower().replace(' ','-')
+                filename = self.documentsDir + filename + ".json"
+                try:
+                    with open(filename, 'x') as file:
+                        #Parsing dal contenuto html a testo (markdown)
+                        contentToText = self.text_maker.handle(articleContent)
+                        pagina["content"] = contentToText
+                        json.dump(pagina, file)
+                        self.log(f'Saved file {filename}')
+                except FileExistsError:
+                    self.log(f'file {filename} already exists, skipping')
+
+            for href in response.xpath("//main//a[not(contains(@class, 'bread-parent'))]/@href").getall():
+                #Evito le chiamate alla stessa pagina e ad ancore nella stessa pagina
+                if href != '/' and href != response.url and href[0] != '#':
+                    yield scrapy.Request(response.urljoin(href), self.parse)
+
+        elif contentType == "application/pdf":
+            page = response.url.split("/")[-1]
+            filename = sanitize(page).lower().replace(' ', '-')
+            filename = self.documentsDir + filename
+            if filename.find(".pdf") == -1:
+                filename += ".pdf"
             try:
-                with open(filename, 'x') as file:
-                    #Parsing dal contenuto html a testo (markdown)
-                    contentToText = self.text_maker.handle(articleContent)
-                    pagina["content"] = contentToText
-                    json.dump(pagina, file)
+                with open(filename, 'xb') as file:
+                    # Scrittura del pdf scaricato
+                    file.write(response.body)
                     self.log(f'Saved file {filename}')
             except FileExistsError:
                 self.log(f'file {filename} already exists, skipping')
-
-        for href in response.xpath('//a/@href').getall():
-            #Evito le chiamate alla stessa pagina
-            if href != '/' and href != response.url:
-                yield scrapy.Request(response.urljoin(href), self.parse)
