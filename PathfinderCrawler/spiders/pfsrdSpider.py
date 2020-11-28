@@ -35,12 +35,15 @@ class PfsrdSpider(Spider):
         if articleContent:
             filename = sanitize(title).lower().replace(' ','-')
             filename = self.documentsDir+filename+".json"
-            with open(filename, 'x') as file:
-                #Parsing dal contenuto html a testo (markdown)
-                contentToText = self.text_maker.handle(articleContent)
-                pagina["content"] = contentToText
-                json.dump(pagina, file)
-                self.log(f'Saved file {filename}')
+            try:
+                with open(filename, 'x') as file:
+                    #Parsing dal contenuto html a testo (markdown)
+                    contentToText = self.text_maker.handle(articleContent)
+                    pagina["content"] = contentToText
+                    json.dump(pagina, file)
+                    self.log(f'Saved file {filename}')
+            except FileExistsError:
+                self.log(f'file {filename} already exists, skipping')
 
         for href in response.xpath('//a/@href').getall():
             #Evito le chiamate alla stessa pagina
