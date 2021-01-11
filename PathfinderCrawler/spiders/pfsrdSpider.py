@@ -18,7 +18,7 @@ class PfsrdSpider(Spider):
         self.text_maker.ignore_tables = True
         super().__init__()
 
-    def parse(self, response):
+    def parse(self, response, **kwargs):
         pagina = {
             "title":None,
             "url":response.url,

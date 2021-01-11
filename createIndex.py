@@ -53,6 +53,7 @@ def createSearchableData(root):
 
 		fp = open(path, 'r', encoding="utf-8")
 		entry = json.loads(fp.read())
+		fp.close()
 		# print(path)
 
 		fileTitle = entry["title"]
@@ -72,7 +73,6 @@ def createSearchableData(root):
 							link=fileLink,
 							content=fileContent,
 							contentData=fileData)
-		fp.close()
 	writer.commit()
 
 
