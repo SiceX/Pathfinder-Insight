@@ -1,7 +1,7 @@
 import json
 import os
 from scrapy import cmdline
-from pdfreader import SimplePDFViewer
+#from pdfreader import SimplePDFViewer
 
 cmdline.execute("scrapy crawl pfsrd".split())
 
