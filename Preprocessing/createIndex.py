@@ -1,5 +1,6 @@
 import os
 import json
+import unicodedata
 from whoosh.index import create_in
 from whoosh.fields import *
 from whoosh.writing import AsyncWriter
@@ -10,13 +11,13 @@ from nltk.corpus import stopwords
 
 def tokenize(text):
 	# tokenizzazione
-	tokens = nltk.word_tokenize(text)
+	tokens = nltk.wordpunct_tokenize(text)
 
 	# Eliminazione di stopwords e punteggiatura
 	tokens2 = []
 	for t in tokens:
-		if t not in stopwords.words('english') and t.isalnum():
-			tokens2.append(t)
+		if t not in stopwords.words('english') and t.isalnum() and not '\\' in t:
+			tokens2.append(t.lower())
 	return tokens2
 
 
@@ -27,8 +28,8 @@ def createSearchableData(docsDirectory):
 					category=ID(stored=True),
 					pageUrl=ID(stored=True),
 					path=ID(stored=True),
-					procContent=TEXT(stored=True),
-					markdownContent=STORED)
+					#markdownContent=STORED,
+					procContent=TEXT)
 
 	# creazione della directory indexdir
 	if not os.path.exists("../indexdir"):
@@ -57,26 +58,32 @@ def createSearchableData(docsDirectory):
 		entry = json.loads(fp.read())
 		fp.close()
 
-		#Titolo tokenizzato
+		#Titolo tokenizzato, con attenzione a possibili caratteri unicode da trasformare in caratteri ASCII
 		processedTitle = ' '.join(tokenize(entry["title"]))
+		processedTitle = unicodedata.normalize('NFKD', processedTitle).encode('ascii', 'ignore').decode('utf-8')
 
 		pageUrl = entry["url"]
 
 		# Contenuto in markdown della pagina
 		markdownContent = entry["content"]
 
-		#estrazione, "pulizia" e tokenizzazione delle frasi usate come argomento della pagina
+		#estrazione, "pulizia" e tokenizzazione delle frasi usate come argomento della pagina, con attenzione a
+		# possibili caratteri unicode da trasformare in caratteri ASCII
 		topicSet = set()
 		for match in topicSearch.findall(markdownContent):
 			topic = str(match).strip(r'\n').strip('#')
 			topicSet = topicSet.union(set(tokenize(topic)))
 		topics = ' '.join(list(topicSet))
+		topics = unicodedata.normalize('NFKD', topics).encode('ascii', 'ignore').decode('utf-8')
 
 		#la categoria è la pagina padre
 		category = str(pageUrl).split(r'/')[3]
+		category = ' '.join(tokenize(category))
 
-		# la sezione contentData è data dal contenuto preprocessato (tokenizzato)
+		# la sezione contentData è data dal contenuto preprocessato (tokenizzato), con attenzione a possibili caratteri
+		# unicode da trasformare in caratteri ASCII
 		procContent = ' '.join(tokenize(markdownContent))
+		procContent = unicodedata.normalize('NFKD', procContent).encode('ascii', 'ignore').decode('utf-8')
 
 		# Aggiunta dell'entry all'indice
 		writer.add_document(docTitle=processedTitle,
@@ -84,11 +91,11 @@ def createSearchableData(docsDirectory):
 							category=category,
 							path=path,
 							pageUrl=pageUrl,
-							markdownContent=markdownContent,
+							#markdownContent=markdownContent,
 							procContent=procContent)
 	writer.commit()
 
 
 cwd = os.getcwd()
-docsDirectory = r"F:\RepoHDD\Progetti\Gestione dell'Informazione\Pathfinder-Insight\documents" #r"..\documents"
+docsDirectory = r"F:\RepoHDD\Progetti\Gestione dell'Informazione\Pathfinder-Insight\documents" #r"..\documents" "\prova"
 createSearchableData(docsDirectory)

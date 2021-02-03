@@ -1,9 +1,29 @@
 import json
 import os
-from scrapy import cmdline
+#from scrapy import cmdline
 #from pdfreader import SimplePDFViewer
 
-cmdline.execute("scrapy crawl pfsrd".split())
+#cmdline.execute("scrapy crawl pfsrd".split())
+import nltk
+from nltk.corpus import stopwords
+
+
+def tokenize(text):
+	# tokenizzazione
+	tokens = nltk.wordpunct_tokenize(text)
+
+
+	# Eliminazione di stopwords e punteggiatura
+	tokens2 = []
+	for t in tokens:
+		if t not in stopwords.words('english') and t.isalnum():
+			tokens2.append(t)
+	return tokens2
+
+
+
+print(tokenize("basics-ability-scores"))
+
 
 #extract text content from .pdf files and generate it's json file
 
