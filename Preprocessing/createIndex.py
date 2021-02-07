@@ -16,7 +16,7 @@ def tokenize(text):
 	# Eliminazione di stopwords e punteggiatura
 	tokens2 = []
 	for t in tokens:
-		if t not in stopwords.words('english') and t.isalnum() and not '\\' in t:
+		if t not in stopwords.words('english') and t.isalnum() and '\\' not in t:
 			tokens2.append(t.lower())
 	return tokens2
 
