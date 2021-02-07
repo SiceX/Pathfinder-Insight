@@ -23,7 +23,7 @@ class Gui:
 				# sg.FolderBrowse('Browse', size=(10, 1)),
 				# sg.Button('Build Index', size=(10, 1), key="_INDEX_"),
 				sg.Button('Search', size=(10, 1), bind_return_key=True, key="_SEARCH_")],
-			#[sg.Output(size=(96, 30), key="_output_")]
+			# TODO [sg.Output(size=(96, 30), key="_output_")]
 		]
 
 		self.window: object = sg.Window('Pathfinder Insight', self.layout, element_justification='left')
@@ -36,24 +36,13 @@ def main():
 
 	while True:
 		event, values = g.window.read()
-		#g.window["_output_"]('')
+		# TODO g.window["_output_"]('')
 
 		# close windows
 		if event is None:
 			break
 
 		if event == '_SEARCH_' and values['TERM'] is not None:
-			# with open(r"logs\cronologia.txt", "w") as f:
-			# 	#spell = Speller(lang='en')
-			# 	# with open("utils/pathfinder_word_count.json", 'r', encoding="utf-8") as fp:
-			# 	# 	pfLanguage = json.loads(fp.read())
-			# 	# 	spell = Speller(lang='en', nlp_data=pfLanguage)
-			# 	#term_fix = spell(values['TERM'])
-			# 	term = values['TERM']
-			# 	print("Searching for >>> " + str(term))
-			# 	if term != term_fix:
-			# 		print("Did you mean >>> " + term_fix)
-			#
 			# 	# TODO utilizzo di wordnet per sinonimi
 			# 	# if values['syn_search']:
 			# 	# 	syn = list()
@@ -66,26 +55,32 @@ def main():
 			# 	# 	# write every term in the cronologia.txt
 			# 	# 	for item in syn:
 			# 	# 		f.write("%s\n" % item)
-			# 	else:
-			# 		f.write(term)
 
 			term = values['TERM']
 			print("Searching for >>> " + str(term))
 
+			with open(r"logs\cronologia.txt", "w") as f:
+				f.write(term)
+
+			# TODO make scoring prefer category and topics hits?
 			qp = MultifieldParser(["docTitle","topics","category","procContent"], schema=ix.schema)
 			q = qp.parse(term)
 
 			with ix.searcher() as searcher:
 				correction = searcher.correct_query(q=q,qstring=term,maxdist=4)
-				print("Did you mean >>> " + correction.string)
+				if term != correction.string:
+					print("Did you mean >>> " + correction.string)
 				results = searcher.search(q)
 
 				numb = 1
 				# print(results[0])
-				for elem in results:
-					print(elem)
-					# print("Result n.{} >>> ".format(numb) + "Page: " + str(elem[0]) + " Score: " + str(elem[1]) + "\n")
-					numb += 1
+				if not results.is_empty():
+					for elem in results:
+						print(elem)
+						# print("Result n.{} >>> ".format(numb) + "Page: " + str(elem[0]) + " Score: " + str(elem[1]) + "\n")
+						numb += 1
+				else:
+					print("Non è stato trovato nessun risultato rilevante")
 
 
 if __name__ == '__main__':
