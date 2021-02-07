@@ -136,6 +136,9 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Project
 /documents/
 /logs/
-indexdir/MAIN_48c752x7y5ipdbdu.seg
+indexdir/*.seg
+Preprocessing/wordCount_DEPRECATED.py
