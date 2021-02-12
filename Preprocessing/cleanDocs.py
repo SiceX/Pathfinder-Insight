@@ -54,6 +54,33 @@ def cleanUnavailablePages(docsDirectory):
 				time.sleep(1)
 
 
+def cleanCopyrightNotices(docsDirectory):
+	cwd = os.getcwd()
+	print(cwd)
+
+	# Lista dei file da scannare
+	filepaths = [os.path.join(docsDirectory, i) for i in os.listdir(docsDirectory) if i.split(".")[-1] == "json"]
+
+	num = 1
+	# per ogni percorso trovato...
+	for path in filepaths:
+		print(f'{num}/{len(filepaths)}')
+		num += 1
+
+		with open(path, 'r', encoding="utf-8") as fp:
+			entry = json.loads(fp.read())
+		content = str(entry["content"])
+		copyrightPlace = content.find("Copyright Notice")
+		if copyrightPlace != -1:
+			content = content[:copyrightPlace]
+			lastNewline = content.rfind("\n\n")
+			content = content[:lastNewline]
+			entry["content"] = content
+			with open(path, 'w', encoding="utf-8") as fp:
+				json.dump(entry, fp)
+
+
 # cwd = os.getcwd()
 docsDirectory = r"..\documents"
-cleanUnavailablePages(docsDirectory)
+# cleanUnavailablePages(docsDirectory)
+cleanCopyrightNotices(docsDirectory)
