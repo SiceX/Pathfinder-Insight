@@ -81,23 +81,23 @@ import os
 
 
 
-import nltk
-
-docsDirectory = r"documents"
-filepaths = [os.path.join(docsDirectory, i) for i in os.listdir(docsDirectory) if i.split(".")[-1] == "json"]
-
-num = 1
-for path in filepaths:
-    print(f'{num}/{len(filepaths)}')
-    num += 1
-
-    with open(path, 'r', encoding="utf-8") as fp:
-        entry = json.loads(fp.read())
-
-    content = entry["content"]
-    tokens = nltk.wordpunct_tokenize(content)
-    for t in tokens:
-        if "\\u" in t:
-            print(t)
-            print("diocane")
+# import nltk
+#
+# docsDirectory = r"documents"
+# filepaths = [os.path.join(docsDirectory, i) for i in os.listdir(docsDirectory) if i.split(".")[-1] == "json"]
+#
+# num = 1
+# for path in filepaths:
+#     print(f'{num}/{len(filepaths)}')
+#     num += 1
+#
+#     with open(path, 'r', encoding="utf-8") as fp:
+#         entry = json.loads(fp.read())
+#
+#     content = entry["content"]
+#     tokens = nltk.wordpunct_tokenize(content)
+#     for t in tokens:
+#         if "\\u" in t:
+#             print(t)
+#             print("diocane")
 

@@ -4,6 +4,7 @@ import string
 
 import PySimpleGUI as sg
 import whoosh.index as index
+import whoosh.scoring as scoring
 from whoosh.analysis import RegexTokenizer
 from whoosh.analysis import StandardAnalyzer, StemmingAnalyzer, CharsetFilter
 from whoosh.qparser import QueryParser
@@ -36,6 +37,7 @@ class Gui:
                 # sg.Button('Build Index', size=(10, 1), key="_INDEX_"),
                 sg.Button('Search', size=(10, 1), bind_return_key=True, key="_SEARCH_")],
             # TODO [sg.Output(size=(96, 30), key="_output_")]
+                [sg.Output(size=(96, 30), key="_output_")]
         ]
 
         self.window: object = sg.Window('Pathfinder Insight', self.layout, element_justification='left')
@@ -68,6 +70,7 @@ def main():
     while True:
         event, values = g.window.read()
         # TODO g.window["_output_"]('')
+        g.window["_output_"]('')
 
         # close windows
         if event is None:
@@ -94,8 +97,9 @@ def main():
                 f.write(terms)
 
             # TODO make scoring prefer category and topics hits?
-            qp = MultifieldParser(["procTitle", "topics", "category", "procContent"], termclass=Variations,
-                                  schema=ix.schema)
+            # il parametro 'fieldboosts' regola quanta importanza dare ai match nei vari campi
+            qp = MultifieldParser(["procTitle", "topics", "categories", "procContent"], termclass=Variations,
+                                  schema=ix.schema, fieldboosts={"procTitle":2.0, "categories":1.5})
             qp.add_plugin(FuzzyTermPlugin())
 
             # stemming dei termini della query e aggiunta della tilda per ricerca "fuzzy" a quelle effettivamente modificate
@@ -111,7 +115,7 @@ def main():
 
             q = qp.parse(' '.join(stemmedWords))
 
-            with ix.searcher() as searcher:
+            with ix.searcher(weighting=scoring.BM25F()) as searcher:
                 correction = searcher.correct_query(q=q, qstring=terms, maxdist=3)
                 if terms != correction.string:
                     print("Did you mean >>> " + correction.string)
