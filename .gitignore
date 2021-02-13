@@ -140,6 +140,5 @@ cython_debug/
 # Project
 /documents/
 /logs/
-indexdir/*.seg
 Preprocessing/wordCount_DEPRECATED.py
 documents_with_all.7z
