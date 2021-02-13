@@ -59,7 +59,7 @@ def createSearchableData(docsDirectory):
 					topics=KEYWORD(stored=True, lowercase=True),
 					categories=KEYWORD(stored=True, lowercase=True),
 					pageUrl=ID(stored=True),
-					path=ID(stored=True),
+					# path=ID(stored=True),
 					# markdownContent=STORED,
 					procContent=TEXT)
 
@@ -142,8 +142,8 @@ def createSearchableData(docsDirectory):
 							procTitle=processedTitle,
 							topics=topics,
 							categories=categoeries,
-							path=path,
 							pageUrl=pageUrl,
+							# path=path,
 							# markdownContent=markdownContent,
 							procContent=procContent)
 	writer.commit()
