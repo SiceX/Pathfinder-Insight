@@ -63,12 +63,12 @@ def createSearchableData(docsDirectory):
 					# markdownContent=STORED,
 					procContent=TEXT)
 
-	# creazione della directory indexdir
-	if not os.path.exists("../indexdir"):
-		os.mkdir("../indexdir")
-
 	cwd = os.getcwd()
 	print(cwd)
+
+	# creazione della directory indexdir
+	if not os.path.exists("indexdir"):
+		os.mkdir("indexdir")
 
 	# Creazione indexWriter, per aggiungere i documenti secondo lo schema
 	ix = create_in("indexdir", schema)
@@ -149,6 +149,5 @@ def createSearchableData(docsDirectory):
 	writer.commit()
 
 
-cwd = os.getcwd()
-docsDir = r"F:\RepoHDD\Progetti\Gestione dell'Informazione\Pathfinder-Insight\documents"  # r"..\documents" "\prova"
+docsDir = "documents"  # "\prova"
 createSearchableData(docsDir)
