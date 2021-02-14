@@ -81,6 +81,6 @@ def cleanCopyrightNotices(docsDirectory):
 
 
 # cwd = os.getcwd()
-docsDirectory = r"..\documents"
+docDir = r"..\documents"
 # cleanUnavailablePages(docsDirectory)
-cleanCopyrightNotices(docsDirectory)
+cleanCopyrightNotices(docDir)
