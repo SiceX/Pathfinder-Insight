@@ -1,20 +1,11 @@
 import os
 import json
 import string
-from itertools import chain
-
-import unicodedata
 from whoosh.index import create_in
 from whoosh.fields import *
 from whoosh.writing import AsyncWriter
-from whoosh.analysis import RegexTokenizer
-from whoosh.lang.porter import stem
 from whoosh.analysis import StandardAnalyzer, StemmingAnalyzer, CharsetFilter
-from whoosh.support.charset import accent_map
 from whoosh.support.charset import default_charset, charset_table_to_dict
-
-import nltk
-from nltk.corpus import stopwords
 
 charmap = charset_table_to_dict(default_charset)
 
@@ -55,7 +46,7 @@ def processText(text, filterStopwords=False, stemming=False, normalizeAccents=Fa
 def createSearchableData(docsDirectory):
 	# definizione dello schema dell'indice
 	schema = Schema(docTitle=STORED,
-					procTitle=KEYWORD,
+					procTitle=KEYWORD(lowercase=True),
 					topics=KEYWORD(stored=True, lowercase=True),
 					categories=KEYWORD(stored=True, lowercase=True),
 					pageUrl=ID(stored=True),
