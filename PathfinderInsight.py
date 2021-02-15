@@ -20,8 +20,8 @@ class Gui:
 			 sg.Checkbox('Synonyms', size=(8, 1), default=False, key='syn_search'),
 			 sg.Button('Search', size=(10, 1), bind_return_key=True, key="_SEARCH_")],
             [sg.Text('Legend:\n'
-                     'It\'s possible to search by simple keywords, or to narrow it down with boolean operators and '
-                     'specifying the fields to search in. It\'s also possible to extend the search to synonyms, with an '
+                     'You can search with keywords, use boolean operators or specify ' 
+                     'the fields to search in.\nIt\'s also possible to extend the search to synonyms, with an '
 					 'added cost on query time.\n'
                      'Boolean operators: AND, OR, ANDNOT, ANDMAYBE, NOT\n'
                      'Available fields: title, category, topic, content\n'
@@ -99,10 +99,15 @@ def main():
 			q = qp.parse(' '.join(stemmedWords))
 
 			with ix.searcher() as searcher:
-				correction = searcher.correct_query(q=q, qstring=terms, maxdist=2)
-				if terms != correction.string:
-					print("- Did you mean >>> " + correction.string)
+				if not values['syn_search']:
+					correction = searcher.correct_query(q=q, qstring=terms, maxdist=2)
+					if terms != correction.string:
+						print("- Did you mean >>> " + correction.string)
 				results = searcher.search(q, terms=True)
+
+				if not values['syn_search'] and results.is_empty():
+					print("- No relevant result has been found for query, trying corrected query")
+					results = searcher.search(qp.parse(correction.string))
 
 				numb = 1
 				if not results.is_empty():
@@ -112,7 +117,7 @@ def main():
 							  f"\tLink to the page: {str(elem['pageUrl'])}\n")
 						numb += 1
 				else:
-					print("No relevant result has been found")
+					print("- No relevant result has been found")
 
 
 if __name__ == '__main__':
